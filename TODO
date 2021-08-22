@@ -1,0 +1,4 @@
+-prove inv_bij
+-prove that the extension of f over a tuple is a bijective if f is bijective
+-construct Q
+

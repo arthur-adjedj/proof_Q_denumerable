@@ -188,24 +188,36 @@ def denombrable (α : Sort u1) : Prop :=
   in_bijection ℕ α
 
 
-def prod_func_left {A : Sort u1} {B : Sort u2} (f : A → B) (C : Sort u3) : pprod A C → pprod B C :=
+def prod_func_left {A : Sort u1} {B : Sort u2}  (f : A → B) (C : Sort u3) : pprod A C → pprod B C :=
   λ x : pprod A C , pprod.mk (f (x.fst))  x.snd
 
 
-def fst {A : Type u1} {B : Type u2}  (x1 : A × B) : A := x1.1
+def fst {A : Sort u1} {B : Sort u2}  (x1 : pprod A B) : A := x1.1
 
-theorem tf {A : Type u1} {B : Type u2} (x1 x2 : A × B) : x1 = x2 → x1.1 = x2.1 ∧ x1.2 = x2.2 :=
+
+theorem map_eq {A : Sort u1} {B : Sort u2} (f : A → B) (x1 x2 : A) :  x1 = x2 → f x1 = f x2 :=
   begin
     intro a,
-    apply and.intro,
-    
+    rewrite a 
+  end
 
+
+theorem tf {A : Sort u1} {B : Sort u2} (x3 x4 :pprod A  B) : x3 = x4 ↔ x3.1 = x4.1 ∧ x3.2 = x4.2 :=
+  begin
+    apply iff.intro,
+      intro a,
+      apply and.intro,
+        apply map_eq (λ x :pprod A  B, x.1) x3 x4 a,
+        apply map_eq (λ x :pprod A B, x.2) x3 x4 a,
+      
+      
   end 
 
 
 
 
-/- theorem prod_bij_prod {A : Type u1} {B : Type u2} (f : A → B) [bijective f] (C : Type u3) :
+
+theorem prod_bij_prod {A : Sort u1} {B : Sort u2} (f : A → B) (C : Sort u3) [bijective f]  :
   bijective (prod_func_left f C) :=
   begin
     apply and.intro,
@@ -213,12 +225,13 @@ theorem tf {A : Type u1} {B : Type u2} (x1 x2 : A × B) : x1 = x2 → x1.1 = x2.
       rewrite prod_func_left,
       simp,
       intro h,
-      change x1 = x2 with x1.1 = x1.1 ∧ x1.2 = x2.2
+      apply _inst_1.left x1.fst x2.fst
+          ((tf.left (prod_func_left f C x1) (prod_func_left f C x2) h).left)
+      
 
       
       
-  end
+  end 
 
-#check prod.inj -/
 
-#check pprod
+
