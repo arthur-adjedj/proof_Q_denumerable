@@ -1,115 +1,7 @@
-import init.logic
-import init.data.nat.basic
-import logic.basic
-import tactic.interactive
-import tactic.push_neg
-import init.core
+import tactic.finish
+import biject
 
 universes u1 u2 u3
-
-constant α : Sort u1
-constant β : Sort u2
-constant γ : Sort u3
-constant f : α → β 
-
-
-def injective {α : Sort u1} {β : Sort u2} (f : α → β ) : Prop :=
-      ∀ (x1 x2 : α ), f x1 = f x2 → x1 = x2 
-
-
-def surjective {α : Sort u1} {β : Sort u2} (f : α → β ) : Prop :=
-  ∀ y : β, ∃ x : α, f x = y
-
-
-def bijective {α : Sort u1} {β : Sort u2} (f : α → β ) : Prop :=
-  injective f ∧ surjective f
-
-
-def in_bijection (A : Sort u1) (B : Sort u2): Prop := ∃ f : A → B , bijective f 
-
-
-def comp {α : Sort u1} {β : Sort u2} {γ : Sort u3} (f : α → β ) (g : β → γ ) := λx : α , g (f x)
-
-
-lemma forall_exists_unique_imp_forall_exists {α : Sort u1} {β : Sort u2} {f : α → β } :
-  (∀ (y : β), ∃! (x : α), f x = y ) → ∀ (y : β), ∃ (x : α), f x = y :=
-  begin
-    intros a b,
-    apply (exists_of_exists_unique (a b))
-  end
-
-
-lemma fuck_this {α : Sort u1} {β : Sort u2} {f : α → β } {x1 x2 : α} : 
-  (∀ (y : β), ∃! (x : α), f x = y ) → f x1 = f x2 → x1 = x2 := 
-  begin
-    intro sup,
-    assume a,
-    apply (unique_of_exists_unique (sup (f x2))),
-    exact a,
-    refl
-  end
-
-
-theorem bijective_equiv {α : Sort u1} {β : Sort u2} (f : α → β ) :
-   bijective f ↔ ∀ y : β, ∃! x : α, f x = y :=
-  begin
-    apply iff.intro,
-      intros p y,
-      cases ((and.elim_right p) y) with x hx,
-      rewrite exists_unique,
-      use x,
-      apply and.intro,
-        exact hx,
-        intro x1,
-        rewrite (eq.symm hx),
-        apply (and.elim_left p),
-      intro sup,
-        apply and.intro,
-          intros x1 x2,
-          apply (fuck_this sup),
-        intro a,
-        apply (exists_of_exists_unique (sup a))
-  end
-
-
-theorem comp_of_inj_inj {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α → β ) (g : β →  γ ) :
-  injective f ∧ injective g → injective (comp f g) :=
-    begin
-      intro andinj,
-      intros x1 x2,
-      exact implies.trans (and.elim_right andinj (f x1) (f x2)) (and.elim_left andinj x1 x2)
-    end
-
-
-theorem comp_of_surj_surj {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α → β ) (g : β →  γ ) :
-  surjective f ∧ surjective g → surjective (comp f g) :=
-  begin
-    intro andsurj,
-    intro y,
-    cases ((and.elim_right andsurj) y) with x1 hx1,
-    cases ((and.elim_left andsurj) x1) with x2 hx2,
-    use x2,
-    calc
-       comp f g x2 = g (f x2) : by refl
-              ...  = g x1 : by rewrite hx2
-              ... = y : by rewrite hx1
-  end
-
-
-theorem comp_of_bij_bij {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α → β) (g : β →  γ) :
-  bijective f ∧ bijective g → bijective (comp f g) :=
-  begin
-    intro hyp,
-    apply and.intro,
-      apply comp_of_inj_inj,
-        apply and.intro,
-          apply and.elim_left (and.elim_left hyp),
-          apply and.elim_left (and.elim_right hyp),
-      apply comp_of_surj_surj,
-        apply and.intro,
-          apply and.elim_right (and.elim_left hyp),
-          apply and.elim_right (and.elim_right hyp)
-  end
 
 
 def id_bij {α : Sort u1 } : bijective (id : α → α ) :=  
@@ -144,27 +36,47 @@ theorem bij_trans : transitive in_bijection :=
     apply hg
   end
 
-
-
-noncomputable def inverse {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : β → α :=
+theorem single_exists_unique {α : Sort u1} {p : α → Prop} :
+  (∃! a : α, p a) ↔ nonempty (subsingleton {a : α // p a}) :=
   begin
-    intro y,
-    apply  (((iff.elim_left (bijective_equiv f)) p) y ).some
+    split,
+      intro hyp,
+        apply nonempty.intro,
+        apply subsingleton.intro,
+        intro u,
+        intro b,
+        cases u,
+        cases b,
+        simp,
+        apply unique_of_exists_unique hyp u_property b_property,
+      intro hyp,
+      
+
   end
 
 
-/- theorem inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : bijective (inverse f p) :=
+noncomputable def inverse {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : β → α :=
+  λ y : β, (((iff.elim_left (bijective_equiv f)) p) y ).some
+
+
+
+theorem inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : bijective (inverse f p) :=
   begin
     apply and.intro,
-      intros x1 x2,
-      rewrite(push_neg.classical.implies_iff_not_or),
+      intros y1 y2,
+      rewrite inverse,
+      simp,
+      intro u,
+      
+
+      
 
 
       
-  end -/
+  end 
 
 
-axiom inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : bijective (inverse f p)
+/-axiom inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : bijective (inverse f p)-/
 
 theorem bij_sym : symmetric in_bijection :=
   begin
@@ -192,8 +104,6 @@ def prod_func_left {A : Sort u1} {B : Sort u2}  (f : A → B) (C : Sort u3) : pp
   λ x : pprod A C , pprod.mk (f (x.fst))  x.snd
 
 
-def fst {A : Sort u1} {B : Sort u2}  (x1 : pprod A B) : A := x1.1
-
 
 theorem map_eq {A : Sort u1} {B : Sort u2} (f : A → B) (x1 x2 : A) :  x1 = x2 → f x1 = f x2 :=
   begin
@@ -202,22 +112,36 @@ theorem map_eq {A : Sort u1} {B : Sort u2} (f : A → B) (x1 x2 : A) :  x1 = x2 
   end
 
 
-theorem tf {A : Sort u1} {B : Sort u2} (x3 x4 :pprod A  B) : x3 = x4 ↔ x3.1 = x4.1 ∧ x3.2 = x4.2 :=
+theorem tf_l {A : Sort u1} {B : Sort u2} {x3 x4 :pprod A  B} : x3 = x4 →  x3.1 = x4.1 ∧ x3.2 = x4.2 :=
   begin
-    apply iff.intro,
-      intro a,
-      apply and.intro,
-        apply map_eq (λ x :pprod A  B, x.1) x3 x4 a,
-        apply map_eq (λ x :pprod A B, x.2) x3 x4 a,
-      
-      
+        intro a,
+        apply and.intro,
+          apply map_eq (λ x :pprod A  B, x.1) x3 x4 a,
+          apply map_eq (λ x :pprod A B, x.2) x3 x4 a,
   end 
 
 
 
+theorem tf_r {A : Sort u1} {B : Sort u2} {x3 x4 :pprod A  B} : x3.1 = x4.1 ∧ x3.2 = x4.2 → x3 = x4 :=
+  begin
+      intro eq1,
+      cases eq1 with a b,
+      cases x3,
+      cases x4,
+      finish
+  end
 
 
-theorem prod_bij_prod {A : Sort u1} {B : Sort u2} (f : A → B) (C : Sort u3) [bijective f]  :
+theorem tf  {A : Sort u1} {B : Sort u2} (x3 x4 :pprod A  B) : x3 = x4 ↔  x3.1 = x4.1 ∧ x3.2 = x4.2 :=
+  begin
+    split,
+    apply tf_l,
+    apply tf_r
+  end
+
+
+
+theorem prod_bij_prod_left {A : Sort u1} {B : Sort u2} (f : A → B) (C : Sort u3) [bijective f]  :
   bijective (prod_func_left f C) :=
   begin
     apply and.intro,
@@ -225,13 +149,26 @@ theorem prod_bij_prod {A : Sort u1} {B : Sort u2} (f : A → B) (C : Sort u3) [b
       rewrite prod_func_left,
       simp,
       intro h,
+      apply iff.elim_right (tf x1 x2),
+      apply and.intro,
       apply _inst_1.left x1.fst x2.fst
-          ((tf.left (prod_func_left f C x1) (prod_func_left f C x2) h).left)
-      
+          ((tf (prod_func_left f C x1) (prod_func_left f C x2)).elim_left h).left,
+        rewrite (tf_l h).elim_right,
 
-      
-      
+    intro y,
+    let x1 := (_inst_1.elim_right y.1).some,
+    use pprod.mk x1 y.2,
+    rewrite prod_func_left,
+    simp,
+    apply tf_r,
+    simp,
+    change x1 with (_inst_1.elim_right y.1).some,
+    apply Exists.some_spec (_inst_1.elim_right y.1),
   end 
 
+theorem Z_denumbrable : denombrable ℤ :=
+  begin
+    let f : ℕ → ℤ  := λ n: ℕ , if is_odd
 
+  end
 
