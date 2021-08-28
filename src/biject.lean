@@ -93,9 +93,11 @@ theorem comp_of_surj_surj {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α
   end
 
 
+
+
 theorem comp_of_bij_bij {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α → β) (g : β →  γ) :
   bijective f ∧ bijective g → bijective (comp f g) :=
-  begin
+  begin 
     intro hyp,
     apply and.intro,
       apply comp_of_inj_inj,
@@ -107,3 +109,81 @@ theorem comp_of_bij_bij {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α �
           apply and.elim_right (and.elim_left hyp),
           apply and.elim_right (and.elim_right hyp)
   end
+
+
+def id_bij {α : Sort u1 } : bijective (id : α → α ) :=  
+  begin
+   apply and.intro,
+        intros x1 x2,
+        simp,
+        intro y,
+      apply exists.intro,
+      rewrite id 
+  end
+
+
+theorem bij_refl : reflexive in_bijection :=
+  begin
+    intro A,
+      apply exists.intro,
+      apply id_bij,
+  end
+
+
+theorem bij_trans : transitive in_bijection :=
+  begin
+    intros A B C,
+    intros F G,
+    cases F with f hf,
+    cases G with g hg,
+    apply exists.intro,
+    apply comp_of_bij_bij f g,
+    apply and.intro,
+    apply hf,
+    apply hg
+  end
+
+noncomputable def inverse {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : β → α :=
+  λ y : β, (((iff.elim_left (bijective_equiv f)) p) y ).some
+
+
+
+theorem inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : bijective (inverse f p) :=
+  begin
+    apply and.intro,
+      intros y1 y2,
+      rewrite inverse,
+      simp,
+      rewrite (Exists.some_spec (inverse f p y1))
+ 
+
+      
+      
+
+      
+
+
+      
+  end 
+
+
+/-axiom inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : bijective (inverse f p)-/
+
+theorem bij_sym : symmetric in_bijection :=
+  begin
+    intros A B,
+    intro inbij,
+    cases inbij with f hf,
+    apply exists.intro,
+    apply inv_bij f hf
+  end
+
+theorem bij_eq : equivalence in_bijection :=
+  begin
+    apply and.intro,
+      apply bij_refl,
+    apply and.intro,
+      apply bij_sym,
+      apply bij_trans
+  end
+

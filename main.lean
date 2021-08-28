@@ -1,40 +1,9 @@
 import tactic.finish
+import tactic.ext
 import biject
 
 universes u1 u2 u3
 
-
-def id_bij {α : Sort u1 } : bijective (id : α → α ) :=  
-  begin
-   apply and.intro,
-        intros x1 x2,
-        simp,
-        intro y,
-      apply exists.intro,
-      rewrite id 
-  end
-
-
-theorem bij_refl : reflexive in_bijection :=
-  begin
-    intro A,
-      apply exists.intro,
-      apply id_bij,
-  end
-
-
-theorem bij_trans : transitive in_bijection :=
-  begin
-    intros A B C,
-    intros F G,
-    cases F with f hf,
-    cases G with g hg,
-    apply exists.intro,
-    apply comp_of_bij_bij f g,
-    apply and.intro,
-    apply hf,
-    apply hg
-  end
 
 theorem single_exists_unique {α : Sort u1} {p : α → Prop} :
   (∃! a : α, p a) ↔ nonempty (subsingleton {a : α // p a}) :=
@@ -55,46 +24,6 @@ theorem single_exists_unique {α : Sort u1} {p : α → Prop} :
   end
 
 
-noncomputable def inverse {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : β → α :=
-  λ y : β, (((iff.elim_left (bijective_equiv f)) p) y ).some
-
-
-
-theorem inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : bijective (inverse f p) :=
-  begin
-    apply and.intro,
-      intros y1 y2,
-      rewrite inverse,
-      simp,
-      intro u,
-      
-
-      
-
-
-      
-  end 
-
-
-/-axiom inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : bijective (inverse f p)-/
-
-theorem bij_sym : symmetric in_bijection :=
-  begin
-    intros A B,
-    intro inbij,
-    cases inbij with f hf,
-    apply exists.intro,
-    apply inv_bij f hf
-  end
-
-theorem bij_eq : equivalence in_bijection :=
-  begin
-    apply and.intro,
-      apply bij_refl,
-    apply and.intro,
-      apply bij_sym,
-      apply bij_trans
-  end
 
 def denombrable (α : Sort u1) : Prop := 
   in_bijection ℕ α
