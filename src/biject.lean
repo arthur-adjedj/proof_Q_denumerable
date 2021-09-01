@@ -181,6 +181,18 @@ constant p : bijective f
 constant x: α 
 
 
+
+
+theorem id_inv_left {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : 
+  ∀ y : β  , f (inverse f p y) = y :=
+  begin
+    intro y,
+    rewrite inverse,
+    simp,
+    apply (Exists.some_spec (((iff.elim_left (bijective_equiv f)) p) y )).left
+  end
+
+
 lemma retard {α : Sort u1} {β : Sort u2} {f : α → β} {p : bijective f} {x : β} {y : α} :
    (inverse f p x = y) = ((λ x : β,inverse f p x = y) x) :=
   by simp
@@ -199,11 +211,26 @@ theorem inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) 
         ((Exists.some_spec (inverse._proof_1 f p (f y))).left),
     intro x,
     simp,
-    rewrite inverse,
-    simp,
     intro hyp,
-    sorry
+    have h := (map_eq f hyp),
+    rewrite eq.symm (id_inv_left f p x),
+    exact h   
+  end
 
-    
-        
-  end 
+theorem bij_sym : symmetric in_bijection :=
+  begin
+    intros A B,
+    intro inbij,
+    cases inbij with f hf,
+    apply exists.intro,
+    apply inv_bij f hf
+  end
+
+theorem bij_eq : equivalence in_bijection :=
+  begin
+    apply and.intro,
+      apply bij_refl,
+    apply and.intro,
+      apply bij_sym,
+      apply bij_trans
+  end

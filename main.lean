@@ -1,32 +1,9 @@
 import tactic.finish
 import tactic.ext
-import tactic.binder_matching
 import biject
-import tactic.converter.binders
 
 universes u1 u2 u3
 
-
-
-/-axiom inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : bijective (inverse f p)-/
-
-theorem bij_sym : symmetric in_bijection :=
-  begin
-    intros A B,
-    intro inbij,
-    cases inbij with f hf,
-    apply exists.intro,
-    apply inv_bij f hf
-  end
-
-theorem bij_eq : equivalence in_bijection :=
-  begin
-    apply and.intro,
-      apply bij_refl,
-    apply and.intro,
-      apply bij_sym,
-      apply bij_trans
-  end
 
 def denombrable (α : Sort u1) : Prop := 
   in_bijection ℕ α
@@ -41,8 +18,8 @@ theorem tf_l {A : Sort u1} {B : Sort u2} {x3 x4 :pprod A  B} : x3 = x4 →  x3.1
   begin
         intro a,
         apply and.intro,
-          apply map_eq (λ x :pprod A  B, x.1) x3 x4 a,
-          apply map_eq (λ x :pprod A B, x.2) x3 x4 a,
+          apply map_eq (λ x :pprod A  B, x.1) a,
+          apply map_eq (λ x :pprod A B, x.2) a,
   end 
 
 
