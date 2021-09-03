@@ -235,3 +235,11 @@ theorem bij_eq : equivalence in_bijection :=
       apply bij_sym,
       apply bij_trans
   end
+
+
+/-theorem comp_is_id {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
+comp f g = id → bijective f:=
+  begin
+    sorry
+  end
+-/

@@ -1,7 +1,10 @@
+import init.data.nat.basic
 import tactic.finish
 import tactic.ext
 import biject
 import data.int.parity
+import tactic.gptf
+
 
 universes u1 u2 u3 u4
 
@@ -41,9 +44,6 @@ def prod_func {A : Sort u1} {B : Sort u2} {C : Sort u3}
 {D : Sort u4} (f : A → B) (g : C → D) : pprod A C → pprod B D :=
   λ x : pprod A C , pprod.mk (f (x.fst))  (g x.snd)
 
-
-
-
 theorem prod_bij_prod_left {A : Sort u1} {B : Sort u2} {C : Sort u3} 
 {D : Sort u4} (f : A → B) (g : C → D) [bijective f] [bijective g] :
   bijective (prod_func f g) :=
@@ -76,11 +76,79 @@ theorem prod_bij_prod_left {A : Sort u1} {B : Sort u2} {C : Sort u3}
   end 
 
 
+def nat_plus := { n : ℕ // ¬ n = 0}
+  
+lemma nat_succ_not_zero (n : ℕ) : ¬ n.succ = 0 :=
+  begin
+    apply not.intro,
+    trivial
+  end
+
+def succ_plus (n : ℕ ) : nat_plus :=
+  ⟨ n.succ,nat_succ_not_zero n⟩ 
+
+lemma not_zero_le (n : ℕ) : ¬ n = 0 ↔ 0 < n :=
+  begin
+    split,
+    apply nat.cases_on n,
+    trivial,
+    intro m,
+    simp,
+    apply nat.cases_on n,
+    simp,
+    intro m,
+    simp
+  end
+
+lemma bon (n : nat_plus) : n.val.pred.succ = n.val :=
+  begin
+  apply n.cases_on,
+  intros k p,
+  simp,
+  apply nat.succ_pred_eq_of_pos ((not_zero_le k).elim_left p)
+  end
+
+
+theorem Nplus_denumbrable : denombrable nat_plus :=
+  begin
+    rewrite [denombrable,in_bijection],
+    use succ_plus,
+    split,
+    intros x1 x2,
+    rewrite [succ_plus,succ_plus],
+    intro hyp,
+    apply subtype.mk.inj,
+    simp,
+    apply nat.succ.inj (subtype.mk_eq_mk.elim_left hyp),
+    exact (λ n : ℕ , true),
+    trivial,
+    trivial,
+    intro y,
+    use y.val.pred,
+    rewrite succ_plus,
+    rewrite eq.symm (subtype.coe_eta y y.property),
+    rewrite subtype.mk.inj_eq,
+    simp,
+    apply bon y
+  end
+
+
+
+
 
 
 theorem Z_denumbrable : denombrable ℤ :=
   begin
-    let f : ℕ → ℤ  := λ n: ℕ 
+    let f : ℕ → ℤ  := λ n: ℕ , (-1) ^n *(n/2),
+    rewrite denombrable,
+    rewrite in_bijection,
+    use f,
+    split,
+    intros x1 x2,
+    
+
+    
+
 
   end
 
