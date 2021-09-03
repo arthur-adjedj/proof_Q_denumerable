@@ -96,7 +96,8 @@ lemma not_zero_le (n : ℕ) : ¬ n = 0 ↔ 0 < n :=
     apply nat.cases_on n,
     simp,
     intro m,
-    simp
+    simp,
+    trivial
   end
 
 lemma bon (n : nat_plus) : n.val.pred.succ = n.val :=
@@ -136,18 +137,17 @@ theorem Nplus_denumbrable : denombrable nat_plus :=
 
 
 
-theorem Z_denumbrable : denombrable ℤ :=
-  begin
+theorem Z_denumbrable : denombrable ℤ := sorry
+  /-begin
     let f : ℕ → ℤ  := λ n: ℕ , (-1) ^n *(n/2),
     rewrite denombrable,
     rewrite in_bijection,
     use f,
     split,
     intros x1 x2,
-    
 
     
 
 
-  end
+  end -/
 
