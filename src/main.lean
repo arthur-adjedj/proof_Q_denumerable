@@ -3,7 +3,6 @@ import tactic.finish
 import tactic.ext
 import biject
 import data.int.parity
-import tactic.gptf
 
 
 universes u1 u2 u3 u4
