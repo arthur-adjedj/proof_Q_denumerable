@@ -1,7 +1,7 @@
 import tactic.interactive
 import tactic.finish
 import data.int.parity
-
+import init.function
 
 
 universes u1 u2 u3
@@ -237,9 +237,35 @@ theorem bij_eq : equivalence in_bijection :=
   end
 
 
-/-theorem comp_is_id {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
+theorem comp_id_inj_right {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
+  comp f g = id → surjective g :=
+  begin
+    intro h,  
+    intro x,
+    use f x,
+    rewrite comp at h,
+    apply function.funext_iff.elim_left h x
+  end
+
+
+
+theorem comp_is_id {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
 comp f g = id → bijective f:=
   begin
-    sorry
-  end
--/
+    rewrite function.funext_iff,
+    intro hyp,
+    split,        
+    intros x1 x2,
+    intro p,
+    let p2 : g (f x1) = g (f x2 ) := by rewrite p,
+    rewrite comp at hyp,
+    finish,
+    let s : surjective g := comp_id_inj_right (function.funext_iff.elim_right hyp),
+    intro x,
+    use g x,
+    rewrite comp at hyp,
+    simp at hyp,
+    
+    
+
+           end
