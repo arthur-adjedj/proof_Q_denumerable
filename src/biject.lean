@@ -26,7 +26,7 @@ def bijective {α : Sort u1} {β : Sort u2} (f : α → β ) : Prop :=
 def in_bijection (A : Sort u1) (B : Sort u2): Prop := ∃ f : A → B , bijective f 
 
 
-def comp {α : Sort u1} {β : Sort u2} {γ : Sort u3} (f : α → β ) (g : β → γ ) := λx : α , g (f x)
+def comp {α : Sort u1} {β : Sort u2} {γ : Sort u3} (f : β → γ ) (g : α  → β  ) := λx : α ,  f (g x)
 
 
 lemma forall_exists_unique_imp_forall_exists {α : Sort u1} {β : Sort u2} {f : α → β } :
@@ -71,7 +71,7 @@ theorem bijective_equiv {α : Sort u1} {β : Sort u2} (f : α → β ) :
 
 
 theorem comp_of_inj_inj {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α → β ) (g : β →  γ ) :
-  injective f ∧ injective g → injective (comp f g) :=
+  injective f ∧ injective g → injective (comp g f) :=
     begin
       intro andinj,
       intros x1 x2,
@@ -80,7 +80,7 @@ theorem comp_of_inj_inj {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α �
 
 
 theorem comp_of_surj_surj {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α → β ) (g : β →  γ ) :
-  surjective f ∧ surjective g → surjective (comp f g) :=
+  surjective f ∧ surjective g → surjective (comp g f) :=
   begin
     intro andsurj,
     intro y,
@@ -88,14 +88,14 @@ theorem comp_of_surj_surj {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α
     cases ((and.elim_left andsurj) x1) with x2 hx2,
     use x2,
     calc
-       comp f g x2 = g (f x2) : by refl
+       comp g f x2 = g (f x2) : by refl
               ...  = g x1 : by rewrite hx2
               ... = y : by rewrite hx1
   end
 
 
 theorem comp_of_bij_bij {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α → β) (g : β →  γ) :
-  bijective f ∧ bijective g → bijective (comp f g) :=
+  bijective f ∧ bijective g → bijective (comp g f) :=
   begin
     intro hyp,
     apply and.intro,
@@ -237,35 +237,52 @@ theorem bij_eq : equivalence in_bijection :=
   end
 
 
-theorem comp_id_inj_right {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
-  comp f g = id → surjective g :=
+theorem comp_inj_inj {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
+  injective (comp f g) → injective g :=
   begin
-    intro h,  
-    intro x,
-    use f x,
-    rewrite comp at h,
-    apply function.funext_iff.elim_left h x
+    contrapose,
+    rewrite injective,
+    simp,
+    intros x1 x2 eq1 neq1,
+    rewrite injective,
+    simp,
+    use x1,
+    use x2,
+    split,
+    rewrite comp,
+    simp,
+    rewrite eq1,
+    exact neq1 
   end
 
 
 
 theorem comp_is_id {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
-comp f g = id → bijective f:=
+comp f g = id → bijective g:=
   begin
-    rewrite function.funext_iff,
     intro hyp,
     split,        
     intros x1 x2,
     intro p,
-    let p2 : g (f x1) = g (f x2 ) := by rewrite p,
-    rewrite comp at hyp,
-    finish,
+    let p2 : f (g x1) = f (g x2 ) := by rewrite p,
+    let p3 : injective (comp f g) :=
+      begin
+        rewrite hyp,
+        exact id_bij.left
+      end,
+    apply (comp_inj_inj p3) x1 x2 p,
+    intro x,
+    use f x,
+    sorry
+
+
+    /- finish,
     let s : surjective g := comp_id_inj_right (function.funext_iff.elim_right hyp),
     intro x,
     use g x,
     rewrite comp at hyp,
     simp at hyp,
-    
+    rewrite hyp (g x) -/
     
 
            end
