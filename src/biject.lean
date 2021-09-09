@@ -194,10 +194,6 @@ theorem id_inv_left {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective
   end
 
 
-lemma retard {α : Sort u1} {β : Sort u2} {f : α → β} {p : bijective f} {x : β} {y : α} :
-   (inverse f p x = y) = ((λ x : β,inverse f p x = y) x) :=
-  by simp
-
 theorem inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : bijective (inverse f p) :=
   begin
     apply iff.elim_right (bijective_equiv (inverse f p)),
