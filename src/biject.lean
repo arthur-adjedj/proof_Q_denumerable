@@ -256,7 +256,19 @@ theorem comp_inj_inj {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → 
 theorem comp_is_id {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
 comp f g = id → bijective g:=
   begin
-    intro hyp,
+    rewrite comp,
+    rewrite bijective_equiv,
+    intros hyp a,
+    apply Exists.intro,
+    simp,
+    split,
+    show g (f a) = a,
+    
+    
+
+
+
+    /- intro hyp,
     split,        
     intros x1 x2,
     intro p,
@@ -269,7 +281,7 @@ comp f g = id → bijective g:=
     apply (comp_inj_inj p3) x1 x2 p,
     intro x,
     use f x,
-    sorry
+    sorry -/
 
 
     /- finish,
