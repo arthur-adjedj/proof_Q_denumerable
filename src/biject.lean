@@ -9,7 +9,6 @@ universes u1 u2 u3
 constant α : Sort u1
 constant β : Sort u2
 constant γ : Sort u3
-constant f : α → β 
 
 def injective {α : Sort u1} {β : Sort u2} (f : α → β ) : Prop :=
       ∀ (x1 x2 : α ), f x1 = f x2 → x1 = x2 
@@ -178,8 +177,6 @@ theorem single_exists_unique {α : Type u1} {p : α → Prop} :
 noncomputable def inverse {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) : β → α :=
   λ y : β, (((iff.elim_left (bijective_equiv f)) p) y ).some
 
-constant p : bijective f
-constant x: α 
 
 
 
@@ -253,7 +250,8 @@ theorem comp_inj_inj {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → 
 
 
 
-theorem comp_is_id {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
+
+/- theorem comp_is_id {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
 comp f g = id → bijective g:=
   begin
     rewrite comp,
@@ -263,6 +261,7 @@ comp f g = id → bijective g:=
     simp,
     split,
     show g (f a) = a,
+    sorry,sorry -/
     
     
 

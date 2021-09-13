@@ -2,8 +2,9 @@ import init.data.nat.basic
 import tactic.finish
 import tactic.ext
 import biject
-import data.int.parity
-
+import init.data.int.basic
+import data.int.basic
+import data.nat.parity
 
 universes u1 u2 u3 u4
 
@@ -133,21 +134,104 @@ theorem Nplus_denumbrable : denombrable nat_plus :=
   end
 
 
+def abs_nat : ℤ → ℕ 
+  |(int.of_nat k) := k
+  |(int.neg_succ_of_nat k) := k
 
 
+@[simp] def nat_abs : ℤ → ℕ
+| (int.of_nat m) := m
+| -[1+ m]    := m.succ
+
+constant h : Prop
+constant dh : decidable h
+constants a b : α 
 
 
-theorem Z_denumbrable : denombrable ℤ := sorry
-  /-begin
-    let f : ℕ → ℤ  := λ n: ℕ , (-1) ^n *(n/2),
+lemma if_works {α : Sort u1} {p : Prop} [decidable p] {a b: α} : p →  (ite p a b = a)  :=
+  begin
+    intro h,
+    simp,
+    intro nh,
+    trivial
+  end
+
+lemma if_not_works {α : Sort u1} {p : Prop} [decidable p] {a b: α} : ¬ p →  (ite p a b = b)  :=
+  begin
+    intro h,
+    rewrite eq.symm (ite_not p b a),
+    apply if_works,
+    exact h
+  end
+
+lemma whatever_decidable : decidable (∀ (n : ℕ), 0 ≤ (n : ℤ )) :=
+  begin
+    simp,
+    apply decidable.true
+  end
+
+def f : ℕ → ℤ  := λ n: ℕ , (-1) ^n *(n/2)
+def g : ℤ → ℕ  := λ z : ℤ, if z ≤  0  then (0-2*(nat_abs z)) else 1+2*(nat_abs z)
+
+lemma leq_two_z_o (n : ℕ) : n<2 → n=0 ∨ n=1 :=
+  begin
+    
+  end
+
+lemma even_succ_not_zero (n : ℕ) (h : even n.succ) : ¬n.succ / 2 = 0 :=
+  begin
+     apply not.intro,
+     have wut : 0 < 2 := by simp,
+     rewrite nat.div_eq_zero_iff wut,
+       
+     
+  end
+
+theorem comp_fg_is_id : comp g f = id :=
+  begin
+    rewrite comp,
+    change g with λ (z : ℤ), ite (z ≤ 0) (0 - 2 * nat_abs z) (1+2 * nat_abs z),
+    change f with λ (n : ℕ), (-1) ^ n * (↑n / 2),
+    simp,
+    rewrite function.funext_iff,
+    intro n,
+    simp,
+    by_cases even n,
+    rewrite nat.neg_one_pow_of_even h,
+    simp,
+    cases n,
+    simp,
+    have p : ¬(↑n.succ / 2 ≤  0) := by simp,
+    
+  end
+
+
+#reduce 1/2
+
+/- theorem Z_denumbrable : denombrable ℤ := 
+  begin
     rewrite denombrable,
     rewrite in_bijection,
     use f,
+    rewrite [bijective,and_comm],
     split,
-    intros x1 x2,
+    intro x,
+    use g x,
+    change g with λ (z : ℤ), ite (z ≤ 0) (1 - 2 * nat_abs z) (2 * nat_abs z),
+    change f with λ (n : ℕ), (-1) ^ n * (↑n / 2),
+    cases x,
+    simp,
+    apply if_works int.coe_nat_nonneg,
+
+
+    
+
+
+
 
     
 
 
   end -/
 
+#check @if_works
