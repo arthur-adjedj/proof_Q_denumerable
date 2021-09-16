@@ -5,6 +5,8 @@ import biject
 import init.data.int.basic
 import data.int.basic
 import data.nat.parity
+import tactic.hint
+
 
 universes u1 u2 u3 u4
 
@@ -170,23 +172,55 @@ lemma whatever_decidable : decidable (∀ (n : ℕ), 0 ≤ (n : ℤ )) :=
     apply decidable.true
   end
 
+
 def f : ℕ → ℤ  := λ n: ℕ , (-1) ^n *(n/2)
 def g : ℤ → ℕ  := λ z : ℤ, if z ≤  0  then (0-2*(nat_abs z)) else 1+2*(nat_abs z)
 
+
+
 lemma leq_two_z_o (n : ℕ) : n<2 → n=0 ∨ n=1 :=
   begin
+    cases n,
+    tauto,
+    intro,
+    fconstructor,
+    hint
+  
+      
     
   end
+
+#check @lt_of_mul_lt_mul_left
+
+lemma lt_of_mul_le_mul_left {α : Type u1} [_inst_1 : linear_ordered_semiring α] {a b c : α}:
+ c * a < c * b → 0 < c → a < b :=
+  begin
+    intros h p,
+    si
+  end
+
+
 
 lemma even_succ_not_zero (n : ℕ) (h : even n.succ) : ¬n.succ / 2 = 0 :=
   begin
      apply not.intro,
      have wut : 0 < 2 := by simp,
      rewrite nat.div_eq_zero_iff wut,
-       
+     simp at *,
+     cases h,
+     norm_cast at *,
+     intro x,
+     safe,
+     rewrite eq.symm (nat.one_mul 2) at x,
+     rewrite nat.mul_assoc at x,
+     have lol :  1 * (2 * h_w) =  (2 * h_w) := by simp,
+     rewrite lol at x,
+     rewrite nat.mul_comm 1 2 at x,
+     rewrite nat.lt_of_mul_le_mul_left at x,
+
      
   end
-
+/-
 theorem comp_fg_is_id : comp g f = id :=
   begin
     rewrite comp,
@@ -203,10 +237,8 @@ theorem comp_fg_is_id : comp g f = id :=
     simp,
     have p : ¬(↑n.succ / 2 ≤  0) := by simp,
     
-  end
+  end -/
 
-
-#reduce 1/2
 
 /- theorem Z_denumbrable : denombrable ℤ := 
   begin
@@ -234,4 +266,3 @@ theorem comp_fg_is_id : comp g f = id :=
 
   end -/
 
-#check @if_works

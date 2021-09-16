@@ -4,7 +4,7 @@ import data.int.parity
 import init.function
 
 
-universes u1 u2 u3
+universes u1 u2 u3 u4
 
 constant α : Sort u1
 constant β : Sort u2
@@ -26,6 +26,10 @@ def in_bijection (A : Sort u1) (B : Sort u2): Prop := ∃ f : A → B , bijectiv
 
 
 def comp {α : Sort u1} {β : Sort u2} {γ : Sort u3} (f : β → γ ) (g : α  → β  ) := λx : α ,  f (g x)
+
+lemma ass_comp {α : Sort u1} {β : Sort u2} {γ : Sort u3} {θ : Sort u4} {f : β → γ } {g : α  → β} {h : γ → θ}: 
+comp h (comp f g) = comp (comp h f) g :=
+  by rewrite [comp,comp,comp,comp];simp
 
 
 lemma forall_exists_unique_imp_forall_exists {α : Sort u1} {β : Sort u2} {f : α → β } :
@@ -230,8 +234,8 @@ theorem bij_eq : equivalence in_bijection :=
   end
 
 
-theorem comp_inj_inj {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
-  injective (comp f g) → injective g :=
+theorem comp_inj_inj {α : Sort u1} {β : Sort u2} {γ : Sort u3 } {f : α → β } {g : β → γ} : 
+  injective (comp g f) → injective f :=
   begin
     contrapose,
     rewrite injective,
@@ -248,48 +252,36 @@ theorem comp_inj_inj {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → 
     exact neq1 
   end
 
-
-
-
-/- theorem comp_is_id {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α} : 
-comp f g = id → bijective g:=
+theorem comp_surj_surj  {α : Sort u1} {β : Sort u2} {γ : Sort u3} {f : α → β } {g : β → γ} :
+  surjective (comp g f) → surjective g :=
   begin
-    rewrite comp,
-    rewrite bijective_equiv,
-    intros hyp a,
-    apply Exists.intro,
-    simp,
-    split,
-    show g (f a) = a,
-    sorry,sorry -/
-    
-    
+    intro h,
+    intro y,
+    rewrite comp at h,
+    let x := f (h y).some,
+    use x,
+    change x with f (h y).some,
+    exact Exists.some_spec (h y)
+  end
 
 
 
-    /- intro hyp,
-    split,        
-    intros x1 x2,
+
+theorem comp_id_is_bij  {α : Sort u1} {β : Sort u2} {f : α → β } {g : β → α } {h : β → α } :
+comp f g = id ∧ comp h f = id → bijective f ∧ g= h :=
+  begin
     intro p,
-    let p2 : f (g x1) = f (g x2 ) := by rewrite p,
-    let p3 : injective (comp f g) :=
-      begin
-        rewrite hyp,
-        exact id_bij.left
-      end,
-    apply (comp_inj_inj p3) x1 x2 p,
-    intro x,
-    use f x,
-    sorry -/
-
-
-    /- finish,
-    let s : surjective g := comp_id_inj_right (function.funext_iff.elim_right hyp),
-    intro x,
-    use g x,
-    rewrite comp at hyp,
-    simp at hyp,
-    rewrite hyp (g x) -/
-    
-
-           end
+    have hg := p.left,
+    have hd := p.right,
+    split,
+    split,
+    have compinj : injective (comp h f) :=
+      by rewrite hd; exact id_bij.left,
+      exact comp_inj_inj compinj,
+    have compsurj : surjective (comp f g) :=
+      by rewrite hg; exact id_bij.right,
+      exact comp_surj_surj compsurj,
+    have eq1 : comp (comp h f) g = g := by rewrite [hd,comp];simp,
+    have eq2 : comp (comp h f) g = h := by rewrite [eq.symm ass_comp,hg,comp];simp,
+    finish,
+  end
