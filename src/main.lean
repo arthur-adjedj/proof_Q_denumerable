@@ -6,6 +6,7 @@ import init.data.int.basic
 import data.int.basic
 import data.nat.parity
 import tactic.hint
+import data.nat.basic
 
 
 universes u1 u2 u3 u4
@@ -52,7 +53,7 @@ theorem prod_bij_prod_left {A : Sort u1} {B : Sort u2} {C : Sort u3}
   begin
     apply and.intro,
       intros x1 x2,
-      rewrite prod_func,
+      rw prod_func,
       simp,
       intro h,
       apply iff.elim_right (tf x1 x2),
@@ -66,7 +67,7 @@ theorem prod_bij_prod_left {A : Sort u1} {B : Sort u2} {C : Sort u3}
     let x1 := (_inst_1.elim_right y.1).some,
     let x2 := (_inst_2.elim_right y.2).some,
     use pprod.mk x1 x2,
-    rewrite prod_func,
+    rw prod_func,
     simp,
     apply tf_r,
     simp,
@@ -114,11 +115,11 @@ lemma bon (n : nat_plus) : n.val.pred.succ = n.val :=
 
 theorem Nplus_denumbrable : denombrable nat_plus :=
   begin
-    rewrite [denombrable,in_bijection],
+    rw [denombrable,in_bijection],
     use succ_plus,
     split,
     intros x1 x2,
-    rewrite [succ_plus,succ_plus],
+    rw [succ_plus,succ_plus],
     intro hyp,
     apply subtype.mk.inj,
     simp,
@@ -128,9 +129,9 @@ theorem Nplus_denumbrable : denombrable nat_plus :=
     trivial,
     intro y,
     use y.val.pred,
-    rewrite succ_plus,
-    rewrite eq.symm (subtype.coe_eta y y.property),
-    rewrite subtype.mk.inj_eq,
+    rw succ_plus,
+    rw eq.symm (subtype.coe_eta y y.property),
+    rw subtype.mk.inj_eq,
     simp,
     apply bon y
   end
@@ -161,7 +162,7 @@ lemma if_works {α : Sort u1} {p : Prop} [decidable p] {a b: α} : p →  (ite p
 lemma if_not_works {α : Sort u1} {p : Prop} [decidable p] {a b: α} : ¬ p →  (ite p a b = b)  :=
   begin
     intro h,
-    rewrite eq.symm (ite_not p b a),
+    rw eq.symm (ite_not p b a),
     apply if_works,
     exact h
   end
@@ -190,62 +191,90 @@ lemma leq_two_z_o (n : ℕ) : n<2 → n=0 ∨ n=1 :=
     
   end
 
-#check @lt_of_mul_lt_mul_left
 
-lemma lt_of_mul_le_mul_left {α : Type u1} [_inst_1 : linear_ordered_semiring α] {a b c : α}:
- c * a < c * b → 0 < c → a < b :=
+lemma is_le_one_is_zero : ∀ n : ℕ, n<1 → n=0 :=
   begin
-    intros h p,
-    si
+    intro n,
+    cases n,
+    simp,
+    intro h,
+    have p : ¬ n.succ < 1 := dec_trivial,
+    apply absurd h p
   end
 
 
 
-lemma even_succ_not_zero (n : ℕ) (h : even n.succ) : ¬n.succ / 2 = 0 :=
+
+lemma even_succ_not_zero (n : ℕ) (h : even n.succ) : ¬(n.succ / 2 = 0) :=
   begin
      apply not.intro,
      have wut : 0 < 2 := by simp,
-     rewrite nat.div_eq_zero_iff wut,
+     rw nat.div_eq_zero_iff wut,
      simp at *,
      cases h,
      norm_cast at *,
      intro x,
      safe,
-     rewrite eq.symm (nat.one_mul 2) at x,
-     rewrite nat.mul_assoc at x,
+     rw eq.symm (nat.one_mul 2) at x,
+     rw nat.mul_assoc at x,
      have lol :  1 * (2 * h_w) =  (2 * h_w) := by simp,
-     rewrite lol at x,
-     rewrite nat.mul_comm 1 2 at x,
-     rewrite nat.lt_of_mul_le_mul_left at x,
-
-     
+     rw lol at x,
+     rw nat.mul_comm 1 2 at x,
+     have triv : 0 ≤ 2 := by simp,
+     have hmm := @lt_of_mul_lt_mul_left nat nat.linear_ordered_semiring h_w 1 2 x triv,
+     have hw_z : h_w= 0 := by apply is_le_one_is_zero h_w hmm,
+     rw hw_z at h_h,
+     simp at h_h,
+     have triv : ¬ n.succ = 0 := by trivial,
+     apply absurd h_h triv
   end
-/-
+
 theorem comp_fg_is_id : comp g f = id :=
   begin
-    rewrite comp,
+    rw comp,
     change g with λ (z : ℤ), ite (z ≤ 0) (0 - 2 * nat_abs z) (1+2 * nat_abs z),
     change f with λ (n : ℕ), (-1) ^ n * (↑n / 2),
     simp,
-    rewrite function.funext_iff,
+    rw function.funext_iff,
     intro n,
     simp,
     by_cases even n,
-    rewrite nat.neg_one_pow_of_even h,
+    rw nat.neg_one_pow_of_even h,
     simp,
     cases n,
     simp,
-    have p : ¬(↑n.succ / 2 ≤  0) := by simp,
+    have p : ¬(n.succ / 2 ≤  0) := by simp;exact even_succ_not_zero n h,
+    simp at p,
+    split_ifs,
+    simp at h_1,
+    norm_cast at *,
+    rw nat.succ_eq_add_one n at p,
+    simp at h_1,
+    apply absurd h_1 p,
+    simp,
+    cases n,
+    simp,
+    apply or.intro_right,
+    finish,
+    norm_cast at *,
+    simp,
+    cases n,
+    simp,
     
-  end -/
+    
+
+
+
+    
+  end
 
 
 /- theorem Z_denumbrable : denombrable ℤ := 
   begin
-    rewrite denombrable,
-    rewrite in_bijection,
+    rw denombrable,
+    rw in_bijection,
     use f,
-    rewrite [bijective,and_comm],
+    rw [bijective,and_comm],
     split,
     intro x,
     use g x,

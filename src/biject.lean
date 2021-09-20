@@ -29,7 +29,7 @@ def comp {α : Sort u1} {β : Sort u2} {γ : Sort u3} (f : β → γ ) (g : α  
 
 lemma ass_comp {α : Sort u1} {β : Sort u2} {γ : Sort u3} {θ : Sort u4} {f : β → γ } {g : α  → β} {h : γ → θ}: 
 comp h (comp f g) = comp (comp h f) g :=
-  by rewrite [comp,comp,comp,comp];simp
+  by rw [comp,comp,comp,comp];simp
 
 
 lemma forall_exists_unique_imp_forall_exists {α : Sort u1} {β : Sort u2} {f : α → β } :
@@ -57,12 +57,12 @@ theorem bijective_equiv {α : Sort u1} {β : Sort u2} (f : α → β ) :
     apply iff.intro,
       intros p y,
       cases ((and.elim_right p) y) with x hx,
-      rewrite exists_unique,
+      rw exists_unique,
       use x,
       apply and.intro,
         exact hx,
         intro x1,
-        rewrite (eq.symm hx),
+        rw (eq.symm hx),
         apply (and.elim_left p),
       intro sup,
         apply and.intro,
@@ -92,8 +92,8 @@ theorem comp_of_surj_surj {α : Sort u1} {β : Sort u2} {γ  : Sort u3}  (f : α
     use x2,
     calc
        comp g f x2 = g (f x2) : by refl
-              ...  = g x1 : by rewrite hx2
-              ... = y : by rewrite hx1
+              ...  = g x1 : by rw hx2
+              ... = y : by rw hx1
   end
 
 
@@ -120,7 +120,7 @@ def id_bij {α : Sort u1 } : bijective (id : α → α ) :=
         simp,
         intro y,
       apply exists.intro,
-      rewrite id 
+      rw id 
   end
 
 
@@ -149,7 +149,7 @@ theorem bij_trans : transitive in_bijection :=
 lemma map_eq {A : Sort u1} {B : Sort u2} (f : A → B) {x1 x2 : A} :  x1 = x2 → f x1 = f x2 :=
   begin
     intro a,
-    rewrite a 
+    rw a 
   end
 
 
@@ -189,7 +189,7 @@ theorem id_inv_left {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective
   ∀ y : β  , f (inverse f p y) = y :=
   begin
     intro y,
-    rewrite inverse,
+    rw inverse,
     simp,
     apply (Exists.some_spec (((iff.elim_left (bijective_equiv f)) p) y )).left
   end
@@ -203,7 +203,7 @@ theorem inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) 
     split,
       simp,
       show (inverse f p (f y) = y),
-      rewrite inverse,
+      rw inverse,
       simp,
       apply p.left (Exists.some _) (y) 
         ((Exists.some_spec (inverse._proof_1 f p (f y))).left),
@@ -211,7 +211,7 @@ theorem inv_bij {α : Sort u1} {β : Sort u2} (f : α → β) (p : bijective f) 
     simp,
     intro hyp,
     have h := (map_eq f hyp),
-    rewrite eq.symm (id_inv_left f p x),
+    rw eq.symm (id_inv_left f p x),
     exact h   
   end
 
@@ -238,17 +238,17 @@ theorem comp_inj_inj {α : Sort u1} {β : Sort u2} {γ : Sort u3 } {f : α → �
   injective (comp g f) → injective f :=
   begin
     contrapose,
-    rewrite injective,
+    rw injective,
     simp,
     intros x1 x2 eq1 neq1,
-    rewrite injective,
+    rw injective,
     simp,
     use x1,
     use x2,
     split,
-    rewrite comp,
+    rw comp,
     simp,
-    rewrite eq1,
+    rw eq1,
     exact neq1 
   end
 
@@ -257,7 +257,7 @@ theorem comp_surj_surj  {α : Sort u1} {β : Sort u2} {γ : Sort u3} {f : α →
   begin
     intro h,
     intro y,
-    rewrite comp at h,
+    rw comp at h,
     let x := f (h y).some,
     use x,
     change x with f (h y).some,
@@ -276,12 +276,12 @@ comp f g = id ∧ comp h f = id → bijective f ∧ g= h :=
     split,
     split,
     have compinj : injective (comp h f) :=
-      by rewrite hd; exact id_bij.left,
+      by rw hd; exact id_bij.left,
       exact comp_inj_inj compinj,
     have compsurj : surjective (comp f g) :=
-      by rewrite hg; exact id_bij.right,
+      by rw hg; exact id_bij.right,
       exact comp_surj_surj compsurj,
-    have eq1 : comp (comp h f) g = g := by rewrite [hd,comp];simp,
-    have eq2 : comp (comp h f) g = h := by rewrite [eq.symm ass_comp,hg,comp];simp,
+    have eq1 : comp (comp h f) g = g := by rw [hd,comp];simp,
+    have eq2 : comp (comp h f) g = h := by rw [eq.symm ass_comp,hg,comp];simp,
     finish,
   end
